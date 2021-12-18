@@ -4,6 +4,8 @@ import { useState, useCallback } from "react";
 import MapGL, { Marker } from "react-map-gl";
 import { PieChart } from "react-minimal-pie-chart";
 
+const DATA_GEOJSON: any = "./japan_tokyo.json";
+
 const geojson = {
   type: 'FeatureCollection',
   features: [
@@ -73,7 +75,7 @@ const Home: NextPage = () => {
           onViewportChange={onViewportChange}
         >
           {geojson.features.map((feature, i) => (
-            <Marker key={i} latitude={feature.geometry.coordinates[0]} longitude={feature.geometry.coordinates[1]} offsetLeft={-20} offsetTop={-10}>
+            <Marker key={i} latitude={feature.geometry.coordinates[0]} longitude={feature.geometry.coordinates[1]} offsetLeft={-10} offsetTop={-10}>
               <CustomPieChart />
             </Marker>
           ))}
