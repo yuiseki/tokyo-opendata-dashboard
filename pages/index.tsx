@@ -30,16 +30,82 @@ type PieChartMarker = {
   data: PieChartData[];
 };
 
+type OpendataStatus = {
+  code: string;
+  exists: number;
+  none: number;
+  all: number;
+};
+
 const Home: NextPage = () => {
-  const [geoJSONData, setGeoJSONData] = useState(undefined);
   const [areaData, setAreaData] = useState<PieChartMarker[]>([]);
+  const [statusData, setStatusData] = useState<OpendataStatus[] | undefined>(
+    undefined
+  );
+  const [geoJSONData, setGeoJSONData] = useState(undefined);
   const [viewport, setViewport] = useState({
     width: "100vw",
     height: "100vh",
     longitude: 139.52197653435175,
     latitude: 35.7918012662416,
-    zoom: 10,
+    zoom: 9,
   });
+
+  useEffect(() => {
+    const fetchStatusData = async () => {
+      // load opendata status
+      const res = await fetch("/tokyo-opendata-dashboard/opendata_status.csv");
+      const text = await res.text();
+      const lines = text.split("\n");
+      const newStatusData = lines.map((l) => {
+        const row = l.split(",");
+        return {
+          code: row[1],
+          exists: +row[2],
+          none: +row[3],
+          all: +row[2] + +row[3],
+        };
+      });
+      setStatusData(newStatusData);
+    };
+    fetchStatusData();
+  }, []);
+
+  useEffect(() => {
+    const fetchAreaData = async () => {
+      // load tokyo office
+      const res1 = await fetch("/tokyo-opendata-dashboard/tokyo_office.csv");
+      const text1 = await res1.text();
+      const lines1 = text1.split("\n");
+      const newAreaData = lines1.map((l) => {
+        const row = l.split(",");
+        const areaPieMarker: PieChartMarker = {
+          code: row[0],
+          name: row[1],
+          longitude: +row[2],
+          latitude: +row[3],
+          data: [],
+        };
+        // 市区町村ごとのオープンデータの状況をマージする
+        const status = statusData?.filter((s) => {
+          return s.code === areaPieMarker.code;
+        });
+        if (status && status.length > 0) {
+          const exists = status[0].exists;
+          const none = status[0].none;
+          areaPieMarker.data = [
+            { title: "exists", value: exists, color: "#0000ff" },
+            { title: "none", value: none, color: "#ff0000" },
+          ];
+        }
+
+        return areaPieMarker;
+      });
+      setAreaData(newAreaData);
+    };
+
+    fetchAreaData();
+  }, [statusData]);
 
   const loadGeoJSONData = (newData: any) => {
     setGeoJSONData(newData);
@@ -58,36 +124,6 @@ const Home: NextPage = () => {
     setViewport(viewport);
   }, []);
 
-  // load csv data
-  useEffect(() => {
-    const fetchAreaData = async () => {
-      const res = await fetch("/tokyo-opendata-dashboard/tokyo_office.csv");
-      const text = await res.text();
-      const result = text.split("\n");
-      const newData = result.map(function (d) {
-        const row = d.split(",");
-        const obj: PieChartMarker = {
-          code: row[0],
-          name: row[1],
-          longitude: +row[2],
-          latitude: +row[3],
-          data: [],
-        };
-        // NOTE: data に市区町村ごとのデータをマージする想定
-        obj.data = [
-          { title: "One", value: 10, color: "#E38627" },
-          { title: "Two", value: 15, color: "#C13C37" },
-          { title: "Three", value: 20, color: "#6A2135" },
-        ];
-
-        return obj;
-      });
-      setAreaData(newData);
-    };
-
-    fetchAreaData();
-  }, []);
-
   return (
     <div className="container">
       <Head>
@@ -101,7 +137,7 @@ const Home: NextPage = () => {
           mapStyle="https://raw.githubusercontent.com/geolonia/notebook/master/style.json"
           onViewportChange={onViewportChange}
         >
-          {geoJSONData && (
+          {geoJSONData && false && (
             <Source type="geojson" data={geoJSONData}>
               <Layer {...layerStyle} />
             </Source>
