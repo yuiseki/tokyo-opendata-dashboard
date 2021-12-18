@@ -5,7 +5,7 @@ import { GeoJsonLayer } from "@deck.gl/layers";
 
 import { HexagonLayer, TileLayer, BitmapLayer } from "deck.gl";
 
-const DATA_URL = "./heatmap-data.csv";
+const STATUS_DATA_URL = "./opendata_status.csv";
 const DATA_GEOJSON = "./japan_tokyo.json";
 
 const colorRange: RGBAColor[] = [
@@ -40,60 +40,60 @@ const renderLayers: any = (props: { data: any }) => {
     },
   });
 
-  const layes = [
-    new HexagonLayer({
-      id: "hexagon-layer",
-      data,
-      colorRange,
-      radius: 1000,
-      extruded: true,
-      elevationScale: 40,
-      elevationRange: [0, 3000],
-      getPosition: (d) => d.position,
-    }),
-  ];
+  const layers: any[] = [];
 
   const GeoJSONLayer = new GeoJsonLayer({
     data: DATA_GEOJSON,
     filled: true,
     stroked: true,
-    getLineWidth: 10,
-    getLineColor: [255, 0, 0],
-    getFillColor: () => {
-      // paint red at random brightness
-      const rand = Math.floor(Math.random() * 255);
-      return [255, rand, rand, 255];
-    }
+    getLineWidth: 30,
+    getLineColor: [0, 0, 0, 100],
+    getFillColor: (d: any) => {
+      const statusForCode = data.filter((i: any) => {
+        if (!d.properties.code) {
+          return false;
+        }
+        return i.code === d.properties.code.toString().slice(0, -1);
+      });
+      if (statusForCode.length > 0) {
+        const all = statusForCode[0].exists + statusForCode[0].none;
+        const brightness = 255 - Math.floor(all / (3500 / 255));
+
+        return [brightness, brightness, 255, 100];
+      } else {
+        return [255, 255, 255, 100];
+      }
+    },
   });
 
-  return [layes, tileLayer, GeoJSONLayer];
+  return [layers, tileLayer, GeoJSONLayer];
 };
 
 const Page: NextPage = () => {
   const [data, setData] = useState({});
 
-  //load data
+  // load csv data
   useEffect(() => {
-    const fetchData = async () => {
-      const res = await fetch(DATA_URL);
+    const fetchStatusData = async () => {
+      const res = await fetch(STATUS_DATA_URL);
       const text = await res.text();
       const result = text.split("\n");
-      const points = result.map(function (d) {
-        const r = d.split(",");
-        return { position: [+r[0], +r[1]] };
+      const newData = result.map(function (d) {
+        const row = d.split(",");
+        return { code: row[1], exists: +row[2], none: +row[3] };
       });
-      setData(points);
+      setData(newData);
     };
 
-    fetchData();
+    fetchStatusData();
   }, []);
 
   const [viewport, setViewport] = useState({
     width: "100vw",
     height: "100vh",
-    longitude: 139.767125,
-    latitude: 35.681236,
-    zoom: 6,
+    longitude: 139.521976,
+    latitude: 35.791801,
+    zoom: 10,
     maxZoom: 16,
     pitch: 30,
     bearing: 0,
