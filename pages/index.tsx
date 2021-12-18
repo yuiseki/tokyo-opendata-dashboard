@@ -1,7 +1,68 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import { useState, useCallback } from "react";
-import MapGL from "react-map-gl";
+import MapGL, { Marker } from "react-map-gl";
+import { PieChart } from 'react-minimal-pie-chart';
+
+const geojson = {
+  type: 'FeatureCollection',
+  features: [
+    {
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [35.6769883, 139.7588499]
+      },
+      properties: {
+        title: 'Mapbox',
+        description: 'Imperial Palace'
+      }
+    },
+    {
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [35.7284377, 139.7205731]
+      },
+      properties: {
+        title: 'Mapbox',
+        description: 'Sugamo Prison'
+      }
+    }
+  ]
+};
+
+const data01 = [
+  { name: 'Group A', value: 400 },
+  { name: 'Group B', value: 300 },
+  { name: 'Group C', value: 300 },
+  { name: 'Group D', value: 200 },
+  { name: 'Group E', value: 278 },
+  { name: 'Group F', value: 189 },
+];
+
+const data02 = [
+  { name: 'Group A', value: 2400 },
+  { name: 'Group B', value: 4567 },
+  { name: 'Group C', value: 1398 },
+  { name: 'Group D', value: 9800 },
+  { name: 'Group E', value: 3908 },
+  { name: 'Group F', value: 4800 },
+];
+
+const CustomPieChart = () => {
+  return (
+    <PieChart
+      data={[
+        { title: 'One', value: 10, color: '#E38627' },
+        { title: 'Two', value: 15, color: '#C13C37' },
+        { title: 'Three', value: 20, color: '#6A2135' },
+      ]}
+      radius={5}
+      center={[5, 5]}
+    />
+  );
+};
 
 const Home: NextPage = () => {
   const [viewport, setViewport] = useState({
@@ -28,7 +89,13 @@ const Home: NextPage = () => {
           {...viewport}
           mapStyle="https://raw.githubusercontent.com/geolonia/notebook/master/style.json"
           onViewportChange={onViewportChange}
-        ></MapGL>
+        >
+          {geojson.features.map((feature, i) => (
+            <Marker key={i} latitude={feature.geometry.coordinates[0]} longitude={feature.geometry.coordinates[1]} offsetLeft={-20} offsetTop={-10}>
+              <CustomPieChart />
+            </Marker>
+          ))}
+        </MapGL>
       </div>
 
       <style jsx>{`
