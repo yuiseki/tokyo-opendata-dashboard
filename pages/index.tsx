@@ -1,7 +1,8 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import { useState, useCallback, useEffect, useMemo } from "react";
-import MapGL, { Layer, LayerProps, Source } from "react-map-gl";
+import MapGL, { Marker, Layer, LayerProps, Source } from "react-map-gl";
+import { PieChart } from "react-minimal-pie-chart";
 
 const layerStyle: LayerProps = {
   id: "my-layer",
@@ -9,6 +10,31 @@ const layerStyle: LayerProps = {
   paint: {
     "fill-color": "#007cbf",
   },
+}
+
+const CustomPieChart = ({ data }: { data: PieChartData[] }) => {
+  return (
+    <PieChart
+      data={data}
+      radius={5}
+      center={[5, 5]}
+      startAngle={270}
+    />
+  );
+};
+
+type PieChartData = {
+  title: string;
+  value: number;
+  color: string;
+}
+
+type PieChartMarker = {
+  code: string;
+  name: string;
+  longitude: number;
+  latitude: number;
+  data: PieChartData[];
 };
 
 const Home: NextPage = () => {
@@ -38,6 +64,31 @@ const Home: NextPage = () => {
     setViewport(viewport);
   }, []);
 
+  const [areaData, setAreaData] = useState<PieChartMarker[]>([]);
+  // load csv data
+  useEffect(() => {
+    const fetchAreaData = async () => {
+      const res = await fetch("/tokyo-opendata-dashboard/tokyo_office.csv");
+      const text = await res.text();
+      const result = text.split("\n");
+      const newData = result.map(function (d) {
+        const row = d.split(",");
+        const obj: PieChartMarker = { code: row[0], name: row[1], longitude: +row[2], latitude: +row[3], data: [] };
+        // NOTE: data に市区町村ごとのデータをマージする想定
+        obj.data = [
+          { title: 'One', value: 10, color: '#E38627' },
+          { title: 'Two', value: 15, color: '#C13C37' },
+          { title: 'Three', value: 20, color: '#6A2135' },
+        ];
+
+        return obj;
+      });
+      setAreaData(newData);
+    };
+
+    fetchAreaData();
+  }, []);
+
   return (
     <div className="container">
       <Head>
@@ -56,6 +107,11 @@ const Home: NextPage = () => {
               <Layer {...layerStyle} />
             </Source>
           )}
+          {areaData.map((office: any, i: number) => (
+            <Marker key={i} latitude={office.latitude} longitude={office.longitude} offsetLeft={-10} offsetTop={-10}>
+              <CustomPieChart data={office.data} />
+            </Marker>
+          ))}
         </MapGL>
       </div>
 
