@@ -10,24 +10,17 @@ const layerStyle: LayerProps = {
   paint: {
     "fill-color": "#007cbf",
   },
-}
+};
 
 const CustomPieChart = ({ data }: { data: PieChartData[] }) => {
-  return (
-    <PieChart
-      data={data}
-      radius={5}
-      center={[5, 5]}
-      startAngle={270}
-    />
-  );
+  return <PieChart data={data} radius={5} center={[5, 5]} startAngle={270} />;
 };
 
 type PieChartData = {
   title: string;
   value: number;
   color: string;
-}
+};
 
 type PieChartMarker = {
   code: string;
@@ -38,6 +31,8 @@ type PieChartMarker = {
 };
 
 const Home: NextPage = () => {
+  const [geoJSONData, setGeoJSONData] = useState(undefined);
+  const [areaData, setAreaData] = useState<PieChartMarker[]>([]);
   const [viewport, setViewport] = useState({
     width: "100vw",
     height: "100vh",
@@ -45,17 +40,16 @@ const Home: NextPage = () => {
     latitude: 35.7918012662416,
     zoom: 10,
   });
-  const [data, setData] = useState(undefined);
 
-  const loadData = (newData: any) => {
-    setData(newData);
+  const loadGeoJSONData = (newData: any) => {
+    setGeoJSONData(newData);
   };
 
   useEffect(() => {
     const fetcher = async () => {
       const res = await fetch("./tokyo-opendata-dashboard/japan_tokyo.json");
       const json = await res.json();
-      loadData(json);
+      loadGeoJSONData(json);
     };
     fetcher();
   }, []);
@@ -64,7 +58,6 @@ const Home: NextPage = () => {
     setViewport(viewport);
   }, []);
 
-  const [areaData, setAreaData] = useState<PieChartMarker[]>([]);
   // load csv data
   useEffect(() => {
     const fetchAreaData = async () => {
@@ -73,12 +66,18 @@ const Home: NextPage = () => {
       const result = text.split("\n");
       const newData = result.map(function (d) {
         const row = d.split(",");
-        const obj: PieChartMarker = { code: row[0], name: row[1], longitude: +row[2], latitude: +row[3], data: [] };
+        const obj: PieChartMarker = {
+          code: row[0],
+          name: row[1],
+          longitude: +row[2],
+          latitude: +row[3],
+          data: [],
+        };
         // NOTE: data に市区町村ごとのデータをマージする想定
         obj.data = [
-          { title: 'One', value: 10, color: '#E38627' },
-          { title: 'Two', value: 15, color: '#C13C37' },
-          { title: 'Three', value: 20, color: '#6A2135' },
+          { title: "One", value: 10, color: "#E38627" },
+          { title: "Two", value: 15, color: "#C13C37" },
+          { title: "Three", value: 20, color: "#6A2135" },
         ];
 
         return obj;
@@ -102,13 +101,19 @@ const Home: NextPage = () => {
           mapStyle="https://raw.githubusercontent.com/geolonia/notebook/master/style.json"
           onViewportChange={onViewportChange}
         >
-          {data && (
-            <Source type="geojson" data={data}>
+          {geoJSONData && (
+            <Source type="geojson" data={geoJSONData}>
               <Layer {...layerStyle} />
             </Source>
           )}
           {areaData.map((office: any, i: number) => (
-            <Marker key={i} latitude={office.latitude} longitude={office.longitude} offsetLeft={-10} offsetTop={-10}>
+            <Marker
+              key={i}
+              latitude={office.latitude}
+              longitude={office.longitude}
+              offsetLeft={-10}
+              offsetTop={-10}
+            >
               <CustomPieChart data={office.data} />
             </Marker>
           ))}
