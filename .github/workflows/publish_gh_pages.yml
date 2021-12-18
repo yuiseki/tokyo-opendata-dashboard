@@ -16,12 +16,7 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 16.x
-      - name: Build parent package
-        run:
-          npm ci
-          npm run build
       - name: Build demo page
-        working-directory: ./demo
         run: |
           npm ci
           npm run build
