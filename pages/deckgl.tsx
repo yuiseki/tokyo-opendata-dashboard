@@ -1,10 +1,12 @@
 import type { NextPage } from "next";
 import React, { useEffect, useState } from "react";
 import DeckGL, { MapController, RGBAColor } from "deck.gl";
+import { GeoJsonLayer } from "@deck.gl/layers";
 
 import { HexagonLayer, TileLayer, BitmapLayer } from "deck.gl";
 
 const DATA_URL = "./heatmap-data.csv";
+const DATA_GEOJSON = "./japan_tokyo.json";
 
 const colorRange: RGBAColor[] = [
   [1, 152, 189],
@@ -51,7 +53,20 @@ const renderLayers: any = (props: { data: any }) => {
     }),
   ];
 
-  return [layes, tileLayer];
+  const GeoJSONLayer = new GeoJsonLayer({
+    data: DATA_GEOJSON,
+    filled: true,
+    stroked: true,
+    getLineWidth: 10,
+    getLineColor: [255, 0, 0],
+    getFillColor: () => {
+      // paint red at random brightness
+      const rand = Math.floor(Math.random() * 255);
+      return [255, rand, rand, 255];
+    }
+  });
+
+  return [layes, tileLayer, GeoJSONLayer];
 };
 
 const Page: NextPage = () => {
@@ -76,8 +91,8 @@ const Page: NextPage = () => {
   const [viewport, setViewport] = useState({
     width: "100vw",
     height: "100vh",
-    longitude: -3.2943888952729092,
-    latitude: 53.63605986631115,
+    longitude: 139.767125,
+    latitude: 35.681236,
     zoom: 6,
     maxZoom: 16,
     pitch: 30,
