@@ -1,10 +1,16 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import { useState, useEffect, useCallback } from "react";
-import MapGL, { Marker } from "react-map-gl";
+import { useState, useCallback, useEffect, useMemo } from "react";
+import MapGL, { Marker, Layer, LayerProps, Source } from "react-map-gl";
 import { PieChart } from "react-minimal-pie-chart";
 
-const DATA_OFFICE = "/tokyo-opendata-dashboard/tokyo_office.csv";
+const layerStyle: LayerProps = {
+  id: "my-layer",
+  type: "fill",
+  paint: {
+    "fill-color": "#007cbf",
+  },
+}
 
 const CustomPieChart = ({ data }: { data: PieChartData[] }) => {
   return (
@@ -39,8 +45,22 @@ const Home: NextPage = () => {
     latitude: 35.7918012662416,
     zoom: 10,
   });
+  const [data, setData] = useState(undefined);
+
+  const loadData = (newData: any) => {
+    setData(newData);
+  };
+
+  useEffect(() => {
+    const fetcher = async () => {
+      const res = await fetch("./tokyo-opendata-dashboard/japan_tokyo.json");
+      const json = await res.json();
+      loadData(json);
+    };
+    fetcher();
+  }, []);
+
   const onViewportChange = useCallback(async (viewport) => {
-    console.log(viewport);
     setViewport(viewport);
   }, []);
 
@@ -48,7 +68,7 @@ const Home: NextPage = () => {
   // load csv data
   useEffect(() => {
     const fetchAreaData = async () => {
-      const res = await fetch(DATA_OFFICE);
+      const res = await fetch("/tokyo-opendata-dashboard/tokyo_office.csv");
       const text = await res.text();
       const result = text.split("\n");
       const newData = result.map(function (d) {
@@ -82,6 +102,11 @@ const Home: NextPage = () => {
           mapStyle="https://raw.githubusercontent.com/geolonia/notebook/master/style.json"
           onViewportChange={onViewportChange}
         >
+          {data && (
+            <Source type="geojson" data={data}>
+              <Layer {...layerStyle} />
+            </Source>
+          )}
           {areaData.map((office: any, i: number) => (
             <Marker key={i} latitude={office.latitude} longitude={office.longitude} offsetLeft={-10} offsetTop={-10}>
               <CustomPieChart data={office.data} />
