@@ -1,12 +1,12 @@
 import type { NextPage } from "next";
 import React, { useEffect, useState } from "react";
-import DeckGL, { MapController } from "deck.gl";
+import DeckGL, { MapController, RGBAColor } from "deck.gl";
 
 import { HexagonLayer, TileLayer, BitmapLayer } from "deck.gl";
 
 const DATA_URL = "./heatmap-data.csv";
 
-const colorRange = [
+const colorRange: RGBAColor[] = [
   [1, 152, 189],
   [73, 227, 206],
   [216, 254, 181],
@@ -15,7 +15,7 @@ const colorRange = [
   [209, 55, 78],
 ];
 
-const renderLayers = (props) => {
+const renderLayers: any = (props: { data: any }) => {
   const { data } = props;
 
   const tileLayer = new TileLayer({
@@ -106,7 +106,7 @@ const Page: NextPage = () => {
         layers={renderLayers({
           data: data,
         })}
-        controller={{ type: MapController, dragRotate: false }}
+        controller={{ dragRotate: false }}
         initialViewState={viewport}
       />
       <div className="attribution">
