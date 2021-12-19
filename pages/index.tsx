@@ -101,7 +101,7 @@ const Home: NextPage = () => {
         };
         // 市区町村ごとのオープンデータの状況をマージする
         const status = statusData?.filter((s) => {
-          return s.code === areaPieMarker.code;
+          return s.code.slice(0, -1) === areaPieMarker.code;
         });
         if (status && status.length > 0) {
           const exists = status[0].exists;
@@ -137,15 +137,15 @@ const Home: NextPage = () => {
             return f;
           }
           const statusDataForCode = statusData.filter((d) => {
-            return d.code === f.properties.code.toString().slice(0, -1);
+            return d.code === f.properties.code.toString();
           });
           if (statusDataForCode[0]) {
             const opendataCount =
               statusDataForCode[0].exists + statusDataForCode[0].none;
             f.properties.opendataCount = opendataCount;
             const alpha = opendataCount / 3000;
-            console.log(opendataCount);
-            console.log(alpha);
+            //console.log(opendataCount);
+            //console.log(alpha);
             f.properties.fillColor = `rgba(68, 146, 61, ${alpha})`;
           }
           return f;
