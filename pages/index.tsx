@@ -54,6 +54,8 @@ const Home: NextPage = () => {
     undefined
   );
   const [geoJSONData, setGeoJSONData] = useState(undefined);
+  const [showPieChart, setShowPieChar] = useState(true);
+  const [showFillLayer, setShowFillLayer] = useState(true);
   const [viewport, setViewport] = useState({
     width: "100vw",
     height: "100vh",
@@ -142,7 +144,7 @@ const Home: NextPage = () => {
               statusDataForCode[0].exists + statusDataForCode[0].none;
             f.properties.opendataCount = opendataCount;
             const brightness = 255 - Math.floor(opendataCount / (1000 / 255));
-            f.properties.fillColor = `rgba(${brightness}, ${brightness}, 255, 100)`;
+            f.properties.fillColor = `rgba(${brightness}, 255, ${brightness}, 100)`;
           }
           return f;
         }),
