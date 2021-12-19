@@ -107,8 +107,8 @@ const Home: NextPage = () => {
           const exists = status[0].exists;
           const none = status[0].none;
           areaPieMarker.data = [
-            { title: "exists", value: exists, color: "#0000ff" },
-            { title: "none", value: none, color: "#ff0000" },
+            { title: "exists", value: exists, color: "#3D6DB6" },
+            { title: "none", value: none, color: "#BB4323" },
           ];
         }
         return areaPieMarker;
@@ -143,7 +143,7 @@ const Home: NextPage = () => {
             const opendataCount =
               statusDataForCode[0].exists + statusDataForCode[0].none;
             f.properties.opendataCount = opendataCount;
-            const alpha = opendataCount / 3500;
+            const alpha = opendataCount / 3000;
             console.log(opendataCount);
             console.log(alpha);
             f.properties.fillColor = `rgba(68, 146, 61, ${alpha})`;
