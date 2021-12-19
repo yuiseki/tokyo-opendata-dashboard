@@ -4,11 +4,21 @@ import { useState, useCallback, useEffect, useMemo } from "react";
 import MapGL, { Marker, Layer, LayerProps, Source } from "react-map-gl";
 import { PieChart } from "react-minimal-pie-chart";
 
-const layerStyle: LayerProps = {
-  id: "my-layer",
+const layerFillStyle: LayerProps = {
+  id: "layer-fill",
   type: "fill",
   paint: {
     "fill-color": "#007cbf",
+    "fill-opacity": 0.6,
+  },
+};
+
+const layerLineStyle: LayerProps = {
+  id: "layer-line",
+  type: "line",
+  paint: {
+    "line-color": "#888",
+    "line-width": 1,
   },
 };
 
@@ -84,7 +94,7 @@ const Home: NextPage = () => {
           name: row[1],
           longitude: +row[2],
           latitude: +row[3],
-          data: [],
+          data: [{ title: "none", value: 1, color: "#ffffff" }],
         };
         // 市区町村ごとのオープンデータの状況をマージする
         const status = statusData?.filter((s) => {
@@ -137,9 +147,10 @@ const Home: NextPage = () => {
           mapStyle="https://raw.githubusercontent.com/geolonia/notebook/master/style.json"
           onViewportChange={onViewportChange}
         >
-          {geoJSONData && false && (
+          {geoJSONData && (
             <Source type="geojson" data={geoJSONData}>
-              <Layer {...layerStyle} />
+              <Layer {...layerFillStyle} />
+              <Layer {...layerLineStyle} />
             </Source>
           )}
           {areaData.map((office: any, i: number) => (
