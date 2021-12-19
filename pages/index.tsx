@@ -7,8 +7,9 @@ import { PieChart } from "react-minimal-pie-chart";
 const layerFillStyle: LayerProps = {
   id: "layer-fill",
   type: "fill",
+  filter: ["has", "fillColor"],
   paint: {
-    "fill-color": "#007cbf",
+    "fill-color": ["get", "fillColor"],
     "fill-opacity": 0.6,
   },
 };
@@ -61,9 +62,9 @@ const Home: NextPage = () => {
     zoom: 9,
   });
 
+  // load opendata status
   useEffect(() => {
     const fetchStatusData = async () => {
-      // load opendata status
       const res = await fetch("/tokyo-opendata-dashboard/opendata_status.csv");
       const text = await res.text();
       const lines = text.split("\n");
@@ -81,9 +82,9 @@ const Home: NextPage = () => {
     fetchStatusData();
   }, []);
 
+  // load tokyo office
   useEffect(() => {
     const fetchAreaData = async () => {
-      // load tokyo office
       const res1 = await fetch("/tokyo-opendata-dashboard/tokyo_office.csv");
       const text1 = await res1.text();
       const lines1 = text1.split("\n");
@@ -94,7 +95,7 @@ const Home: NextPage = () => {
           name: row[1],
           longitude: +row[2],
           latitude: +row[3],
-          data: [{ title: "none", value: 1, color: "#ffffff" }],
+          data: [{ title: "none", value: 1, color: "#000" }],
         };
         // 市区町村ごとのオープンデータの状況をマージする
         const status = statusData?.filter((s) => {
@@ -108,7 +109,6 @@ const Home: NextPage = () => {
             { title: "none", value: none, color: "#ff0000" },
           ];
         }
-
         return areaPieMarker;
       });
       setAreaData(newAreaData);
@@ -122,13 +122,35 @@ const Home: NextPage = () => {
   };
 
   useEffect(() => {
+    if (!statusData) {
+      return;
+    }
     const fetcher = async () => {
       const res = await fetch("./tokyo-opendata-dashboard/japan_tokyo.json");
       const json = await res.json();
-      loadGeoJSONData(json);
+      const jsonWithCount = {
+        ...json,
+        features: json.features.map((f: any) => {
+          if (!f.properties.code) {
+            return f;
+          }
+          const statusDataForCode = statusData.filter((d) => {
+            return d.code === f.properties.code.toString().slice(0, -1);
+          });
+          if (statusDataForCode[0]) {
+            const opendataCount =
+              statusDataForCode[0].exists + statusDataForCode[0].none;
+            f.properties.opendataCount = opendataCount;
+            const brightness = 255 - Math.floor(opendataCount / (1000 / 255));
+            f.properties.fillColor = `rgba(${brightness}, ${brightness}, 255, 100)`;
+          }
+          return f;
+        }),
+      };
+      loadGeoJSONData(jsonWithCount);
     };
     fetcher();
-  }, []);
+  }, [statusData]);
 
   const onViewportChange = useCallback(async (viewport) => {
     setViewport(viewport);
