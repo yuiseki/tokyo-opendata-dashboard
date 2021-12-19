@@ -126,7 +126,7 @@ const Home: NextPage = () => {
       return;
     }
     const fetcher = async () => {
-      const res = await fetch("./tokyo-opendata-dashboard/japan_tokyo.json");
+      const res = await fetch("/tokyo-opendata-dashboard/japan_tokyo.json");
       const json = await res.json();
       const jsonWithCount = {
         ...json,
