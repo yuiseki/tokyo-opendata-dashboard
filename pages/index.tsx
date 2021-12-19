@@ -19,7 +19,7 @@ const layerLineStyle: LayerProps = {
   type: "line",
   paint: {
     "line-color": "#888",
-    "line-width": 1,
+    "line-width": 2,
   },
 };
 
