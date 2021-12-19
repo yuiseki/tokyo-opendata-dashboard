@@ -61,7 +61,7 @@ const Home: NextPage = () => {
     height: "100vh",
     longitude: 139.52197653435175,
     latitude: 35.7918012662416,
-    zoom: 9,
+    zoom: 10,
   });
 
   // load opendata status
