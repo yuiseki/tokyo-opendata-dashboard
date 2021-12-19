@@ -143,8 +143,10 @@ const Home: NextPage = () => {
             const opendataCount =
               statusDataForCode[0].exists + statusDataForCode[0].none;
             f.properties.opendataCount = opendataCount;
-            const brightness = 255 - Math.floor(opendataCount / (1000 / 255));
-            f.properties.fillColor = `rgba(${brightness}, 255, ${brightness}, 100)`;
+            const alpha = opendataCount / 3500;
+            console.log(opendataCount);
+            console.log(alpha);
+            f.properties.fillColor = `rgba(68, 146, 61, ${alpha})`;
           }
           return f;
         }),
