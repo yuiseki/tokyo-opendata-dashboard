@@ -3,7 +3,7 @@
 ```
 git clone git@github.com:yuiseki/tokyo-opendata-dashboard.git
 cd tokyo-opendata-dashboard
-npm i
+npm ci
 npm run dev
 ```
 
