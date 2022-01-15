@@ -1,7 +1,7 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import { useState, useCallback, useEffect, useMemo } from "react";
-import MapGL, { Marker, Layer, LayerProps, Source } from "react-map-gl";
+import MapGL, { Marker, Layer, LayerProps, Source, Popup } from "react-map-gl";
 import { PieChart } from "react-minimal-pie-chart";
 
 const layerFillStyle: LayerProps = {
@@ -87,10 +87,10 @@ const Home: NextPage = () => {
   // load tokyo office
   useEffect(() => {
     const fetchAreaData = async () => {
-      const res1 = await fetch("/tokyo-opendata-dashboard/tokyo_office.csv");
-      const text1 = await res1.text();
-      const lines1 = text1.split("\n");
-      const newAreaData = lines1.map((l) => {
+      const res = await fetch("/tokyo-opendata-dashboard/tokyo_office.csv");
+      const text = await res.text();
+      const lines = text.split("\n");
+      const newAreaData = lines.map((l) => {
         const row = l.split(",");
         const areaPieMarker: PieChartMarker = {
           code: row[0],
@@ -115,7 +115,6 @@ const Home: NextPage = () => {
       });
       setAreaData(newAreaData);
     };
-
     fetchAreaData();
   }, [statusData]);
 
@@ -170,7 +169,7 @@ const Home: NextPage = () => {
       <div id="map">
         <MapGL
           {...viewport}
-          mapStyle="https://raw.githubusercontent.com/geolonia/notebook/master/style.json"
+          mapStyle="https://raw.githubusercontent.com/geoloniamaps/notebook/gh-pages/style.json"
           onViewportChange={onViewportChange}
         >
           {geoJSONData && (
@@ -187,6 +186,10 @@ const Home: NextPage = () => {
               offsetLeft={-10}
               offsetTop={-10}
             >
+              <Popup
+                latitude={office.latitude}
+                longitude={office.longitude}
+              ></Popup>
               <CustomPieChart data={office.data} />
             </Marker>
           ))}
